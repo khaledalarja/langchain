@@ -15,8 +15,8 @@ class ConversationBufferWindowMemory(BaseChatMemory):
 
     @property
     def buffer(self) -> List[BaseMessage]:
-        """String buffer of memory."""
-        return self.chat_memory.messages
+        """Return list of the last k*2 messages."""
+        return self.chat_memory.messages[-self.k * 2 :] if self.k > 0 else []
 
     @property
     def memory_variables(self) -> List[str]:
