@@ -187,6 +187,7 @@ class BaseConversationalRetrievalChain(Chain):
         if self.rephrase_question:
             new_inputs["question"] = new_question
         new_inputs["chat_history"] = chat_history_str
+        
         answer = await self.combine_docs_chain.arun(
             input_documents=docs, callbacks=_run_manager.get_child(), **new_inputs
         )

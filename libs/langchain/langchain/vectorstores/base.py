@@ -471,6 +471,7 @@ class VectorStoreRetriever(BaseRetriever):
     allowed_search_types: ClassVar[Collection[str]] = (
         "similarity",
         "similarity_score_threshold",
+        "similarity_search_with_score_and_threshold",
         "mmr",
     )
 
@@ -488,7 +489,7 @@ class VectorStoreRetriever(BaseRetriever):
                 f"search_type of {search_type} not allowed. Valid values are: "
                 f"{cls.allowed_search_types}"
             )
-        if search_type == "similarity_score_threshold":
+        if search_type in ["similarity_score_threshold", "similarity_search_with_score_and_threshold"]:
             score_threshold = values["search_kwargs"].get("score_threshold")
             if (score_threshold is None) or (not isinstance(score_threshold, float)):
                 raise ValueError(
@@ -509,6 +510,16 @@ class VectorStoreRetriever(BaseRetriever):
                 )
             )
             docs = [doc for doc, _ in docs_and_similarities]
+        elif self.search_type == "similarity_search_with_score_and_threshold":
+            docs_and_similarities = (
+                self.vectorstore.similarity_search_with_relevance_scores(
+                    query, **self.search_kwargs
+                )
+            )
+            for doc, similarity in docs_and_similarities:
+                doc.metadata['similarity_score'] = similarity
+            # Now each Document instance in docs_and_similarities has the similarity score in its metadata
+            docs, _ = zip(*docs_and_similarities)
         elif self.search_type == "mmr":
             docs = self.vectorstore.max_marginal_relevance_search(
                 query, **self.search_kwargs
@@ -531,6 +542,17 @@ class VectorStoreRetriever(BaseRetriever):
                 )
             )
             docs = [doc for doc, _ in docs_and_similarities]
+        elif self.search_type == "similarity_search_with_score_and_threshold":
+            docs_and_similarities = (
+                await self.vectorstore.asimilarity_search_with_relevance_scores(
+                    query, **self.search_kwargs
+                )
+            )
+            for doc, similarity in docs_and_similarities:
+                doc.metadata['similarity_score'] = similarity
+
+            # Now each Document instance in docs_and_similarities has the similarity score in its metadata
+            docs, _ = zip(*docs_and_similarities)
         elif self.search_type == "mmr":
             docs = await self.vectorstore.amax_marginal_relevance_search(
                 query, **self.search_kwargs
