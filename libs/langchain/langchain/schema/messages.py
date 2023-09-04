@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Sequence, Optional
 
 from pydantic import Field
 
@@ -62,6 +62,7 @@ class BaseMessage(Serializable):
     """
 
     content: str
+    created_at: Optional[str] = None
     """The string contents of the message."""
 
     additional_kwargs: dict = Field(default_factory=dict)
