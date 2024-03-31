@@ -516,16 +516,12 @@ class VectorStoreRetriever(BaseRetriever):
                     query, **self.search_kwargs
                 )
             )
-            print("--------------------------------")
             if not docs_and_similarities:  # Check if docs_and_similarities is empty
                 return []
-            print("111")
             for doc, similarity in docs_and_similarities:
                 doc.metadata['similarity_score'] = similarity
-            print("222")
             # Now each Document instance in docs_and_similarities has the similarity score in its metadata
             docs, _ = zip(*docs_and_similarities)
-            print("333")
         elif self.search_type == "mmr":
             docs = self.vectorstore.max_marginal_relevance_search(
                 query, **self.search_kwargs
